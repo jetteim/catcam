@@ -23,6 +23,10 @@ class AnalysisConfig:
     warmup_frames: int
     motion_min_area: int
     motion_min_score: float
+    track_max_missing_frames: int = 5
+    track_motion_min_score: float = 0.08
+    track_min_iou: float = 0.3
+    track_max_centroid_distance: float = 80.0
 
 
 @dataclass

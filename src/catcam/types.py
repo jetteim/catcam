@@ -23,6 +23,24 @@ class Detection:
 
 
 @dataclass
+class TargetCandidate:
+    detection: Detection
+    resolved_label: str
+    motion_fraction: float
+
+
+@dataclass
+class TrackedTarget:
+    track_id: int
+    detection: Detection
+    motion_fraction: float
+    centroid_distance: float
+    area_change_ratio: float
+    motion_score: float
+    active_motion: bool
+
+
+@dataclass
 class TrackMotionObservation:
     timestamp: datetime
     target_motion: bool

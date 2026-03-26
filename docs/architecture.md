@@ -214,7 +214,7 @@ The event start time is the first confirmed target-motion timestamp, not the tim
 Two-layer design:
 
 - `PreEventBuffer`
-  - always-on circular buffer containing the last 2-5 seconds.
+  - always-on circular buffer containing the last 3-5 seconds.
 - `ClipWriter`
   - writes the selected pre-roll plus active frames to final storage.
 
@@ -262,7 +262,7 @@ Metadata JSON should include:
 6. Tracker links detections across frames.
 7. Motion scorer confirms that a target object itself is moving.
 8. Event state machine opens or extends a clip.
-9. Recorder flushes 2 seconds of buffered video before the event and appends post-event footage.
+9. Recorder flushes 3 seconds of buffered video before the event and appends post-event footage.
 10. Storage manager writes MP4 + JSON under `records/YYYY/MM/DD`.
 
 ## 5. Platform Migration Strategy
@@ -380,7 +380,7 @@ Mitigation:
 The design aligns with current upstream docs showing:
 
 - Raspberry Pi camera support is centered on `Picamera2` over `libcamera`.
-- `Picamera2` supports `CircularOutput`, which directly fits the 2-second pre-event requirement.
+- `Picamera2` supports `CircularOutput`, which directly fits the 3-second pre-event requirement.
 - OpenCV exposes AVFoundation on macOS and provides standard video I/O and background subtraction primitives.
 - Ultralytics supports export to ONNX, TFLite, and NCNN.
 - ONNX Runtime provides a CPU Python package for Arm-based CPUs and macOS.

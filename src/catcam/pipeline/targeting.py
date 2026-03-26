@@ -1,35 +1,28 @@
 from __future__ import annotations
 
 from catcam.pipeline.baby_resolver import BabyResolver
-from catcam.types import Detection, MotionAnalysis
+from catcam.types import Detection, MotionAnalysis, TargetCandidate
 
 
-def select_target_detections(
+def select_target_candidates(
     detections: list[Detection],
     motion: MotionAnalysis,
     frame_shape: tuple[int, int, int],
     baby_resolver: BabyResolver,
-    min_motion_fraction: float = 0.05,
-) -> list[Detection]:
+    min_confidence: float = 0.35,
+) -> list[TargetCandidate]:
     if motion.mask is None:
         return []
 
-    results: list[Detection] = []
+    results: list[TargetCandidate] = []
     for detection in detections:
+        if detection.confidence < min_confidence:
+            continue
         resolved = baby_resolver.resolve(detection, frame_shape)
         if not resolved:
             continue
         motion_fraction = foreground_fraction(motion.mask, detection.bbox)
-        if motion_fraction < min_motion_fraction:
-            continue
-        results.append(
-            Detection(
-                label=resolved,
-                original_label=detection.label,
-                confidence=detection.confidence,
-                bbox=detection.bbox,
-            )
-        )
+        results.append(TargetCandidate(detection=detection, resolved_label=resolved, motion_fraction=motion_fraction))
     return results
 
 

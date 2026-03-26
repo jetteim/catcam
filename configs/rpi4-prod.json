@@ -18,9 +18,9 @@
   },
   "recording": {
     "root": "records",
-    "pre_event_seconds": 2.0,
+    "pre_event_seconds": 3.0,
     "post_event_seconds": 3.0,
-    "merge_gap_seconds": 6.0,
+    "merge_gap_seconds": 3.0,
     "container": "mp4"
   },
   "detection": {

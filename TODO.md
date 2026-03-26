@@ -36,10 +36,10 @@
 - [x] Implement detector runtime wrapper.
 - [ ] Export a lightweight detector to ONNX.
 - [x] Implement cat/person label mapping.
-- [ ] Implement simple IoU or centroid tracker.
-- [ ] Implement per-track motion scoring.
+- [x] Implement simple IoU or centroid tracker.
+- [x] Implement per-track motion scoring.
 - [x] Implement event state machine with pre-roll and post-roll.
-- [ ] Verify that non-target motion does not save clips.
+- [x] Verify that non-target motion does not save clips.
 
 ## Phase 4: Cat-Only Validation
 
@@ -63,11 +63,11 @@
 - [ ] Set up Raspberry Pi 4 with 64-bit Raspberry Pi OS.
 - [ ] Attach and validate Raspberry Pi camera with `Picamera2`.
 - [x] Implement Pi camera backend.
-- [ ] Implement Pi recording backend with `CircularOutput`.
+- [x] Implement Pi recording backend with `CircularOutput`.
 - [ ] Compare ONNX Runtime performance on Pi.
 - [ ] If needed, benchmark TFLite/INT8 or NCNN export.
 - [ ] Tune analysis resolution, FPS, and buffer sizes for Pi thermals and CPU.
-- [ ] Add `systemd` service unit.
+- [x] Add `systemd` service unit.
 
 ## Phase 7: Hardening
 
@@ -90,7 +90,7 @@
 ## First Build Slice
 
 - [ ] Implement macOS-only cat detection first.
-- [ ] Verify 2-second pre-roll from webcam input.
+- [ ] Verify 3-second pre-roll from webcam input.
 - [ ] Save clips correctly under dated folders.
 - [ ] Add replay-based tests.
 - [ ] Only after that, add baby mode.

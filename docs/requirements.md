@@ -8,7 +8,7 @@ Build an offline video event-capture system that:
 - later runs on Raspberry Pi 4 with a Raspberry Pi camera;
 - saves clips only when motion is caused by a cat or a baby;
 - ignores all other motion and no-motion periods;
-- includes video from 2 seconds before the event starts.
+- includes video from 3 seconds before the event starts.
 
 ## 2. Functional Requirements
 
@@ -30,8 +30,8 @@ Build an offline video event-capture system that:
 
 ### 2.3 Recording
 
-- The system must keep a rolling pre-event buffer of at least 2 seconds.
-- A saved clip must begin at least 2 seconds before the confirmed event start timestamp.
+- The system must keep a rolling pre-event buffer of at least 3 seconds.
+- A saved clip must begin at least 3 seconds before the confirmed event start timestamp.
 - A saved clip must continue until target motion ends plus a configurable post-roll.
 - Multiple detections close in time should be merged into a single clip when the gap is below a configurable threshold.
 - Output clips should default to MP4/H.264 for broad compatibility.
@@ -93,7 +93,7 @@ Build an offline video event-capture system that:
 ## 5. Acceptance Criteria For MVP
 
 - From a MacBook camera, the system runs locally and writes clips only for target motion.
-- Saved clips start at least 2 seconds before the first confirmed target-motion frame.
+- Saved clips start at least 3 seconds before the first confirmed target-motion frame.
 - Clips are written under `records/YYYY/MM/DD`.
 - Cat events are detected with stable precision in the target room.
 - Baby events work in one of these MVP modes:

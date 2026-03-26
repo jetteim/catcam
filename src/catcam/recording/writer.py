@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 from catcam.config import AppConfig
+from catcam.recording.base import RecorderBackend
 from catcam.storage.metadata import write_event_metadata
 from catcam.storage.paths import build_clip_paths, ensure_day_directory
 from catcam.types import Detection, EventDecision, EventRecord, FramePacket
@@ -25,7 +26,7 @@ class RecordingSession:
     written_frames: set[int] = field(default_factory=set)
 
 
-class ClipRecorder:
+class ClipRecorder(RecorderBackend):
     def __init__(self, config: AppConfig) -> None:
         self.config = config
         self._session: RecordingSession | None = None
@@ -55,10 +56,11 @@ class ClipRecorder:
 
         frame = pre_event_frames[0].image
         height, width = frame.shape[:2]
+        output_fps = estimate_output_fps(pre_event_frames, fallback_fps=float(self.config.camera.fps))
         writer = cv2.VideoWriter(
             str(clip_path),
             cv2.VideoWriter_fourcc(*"mp4v"),
-            self.config.camera.fps,
+            output_fps,
             (width, height),
         )
         if not writer.isOpened():
@@ -114,3 +116,15 @@ class ClipRecorder:
         if self._session is None:
             raise RuntimeError("recording session is not active")
         return self._session
+
+
+def estimate_output_fps(pre_event_frames: list[FramePacket], fallback_fps: float) -> float:
+    if len(pre_event_frames) < 2:
+        return fallback_fps
+    elapsed = pre_event_frames[-1].monotonic_seconds - pre_event_frames[0].monotonic_seconds
+    if elapsed <= 0:
+        return fallback_fps
+    observed_fps = (len(pre_event_frames) - 1) / elapsed
+    if observed_fps < 1.0 or observed_fps > 120.0:
+        return fallback_fps
+    return observed_fps

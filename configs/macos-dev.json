@@ -18,9 +18,9 @@
   },
   "recording": {
     "root": "records",
-    "pre_event_seconds": 2.0,
+    "pre_event_seconds": 3.0,
     "post_event_seconds": 3.0,
-    "merge_gap_seconds": 6.0,
+    "merge_gap_seconds": 3.0,
     "container": "mp4"
   },
   "detection": {
@@ -32,7 +32,7 @@
     "nms_threshold": 0.5
   },
   "baby_resolver": {
-    "mode": "roi_person_is_baby",
+    "mode": "disabled",
     "roi": [0.2, 0.2, 0.8, 0.95]
   }
 }

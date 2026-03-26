@@ -48,3 +48,6 @@ class PiCameraBackend(CameraBackend):
             self._camera.stop()
             self._camera.close()
             self._camera = None
+
+    def native_camera(self):
+        return self._camera

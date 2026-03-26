@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import logging
-from pathlib import Path
 
 import cv2
 
@@ -11,9 +10,10 @@ from catcam.camera.factory import create_camera_backend
 from catcam.pipeline.baby_resolver import BabyResolver
 from catcam.pipeline.detector import create_detector
 from catcam.pipeline.motion import BackgroundMotionDetector
-from catcam.pipeline.targeting import select_target_detections
-from catcam.recording.writer import ClipRecorder
-from catcam.types import Detection, TrackMotionObservation
+from catcam.pipeline.targeting import select_target_candidates
+from catcam.pipeline.tracker import SimpleTracker
+from catcam.recording.factory import create_recorder
+from catcam.types import Detection, TrackMotionObservation, TrackedTarget
 
 
 @dataclass
@@ -29,6 +29,8 @@ class CatCamRuntime:
         self.logger = logging.getLogger("catcam.runtime")
         self.context = build_context(options.config_path, input_path=options.input_path)
         self.options = options
+        if self.context.camera is None:
+            raise RuntimeError("runtime requires a camera backend")
         self.camera = self.context.camera
         self.motion = BackgroundMotionDetector(
             min_area=self.context.config.analysis.motion_min_area,
@@ -36,13 +38,20 @@ class CatCamRuntime:
         )
         self.detector = create_detector(self.context.config.detection)
         self.baby_resolver = BabyResolver(self.context.config.baby_resolver)
-        self.recorder = ClipRecorder(self.context.config)
+        self.tracker = SimpleTracker(
+            max_missing_frames=self.context.config.analysis.track_max_missing_frames,
+            min_iou=self.context.config.analysis.track_min_iou,
+            max_centroid_distance=self.context.config.analysis.track_max_centroid_distance,
+            min_motion_score=self.context.config.analysis.track_motion_min_score,
+        )
+        self.recorder = create_recorder(self.context.config, self.camera)
 
     def run(self) -> int:
         processed = 0
         self.camera.start()
         last_packet = None
         try:
+            self.recorder.open()
             while True:
                 if self.options.max_frames is not None and processed >= self.options.max_frames:
                     break
@@ -73,28 +82,30 @@ class CatCamRuntime:
                     )
                     for detection in detections
                 ]
-                target_detections = select_target_detections(
+                target_candidates = select_target_candidates(
                     scaled_detections,
                     scale_motion_mask(motion, frame.shape),
                     frame_shape=frame.shape,
                     baby_resolver=self.baby_resolver,
                 )
+                tracked_targets = self.tracker.update(target_candidates)
+                active_targets = [target for target in tracked_targets if target.active_motion]
 
                 observation = TrackMotionObservation(
                     timestamp=packet.wall_time,
-                    target_motion=bool(target_detections),
-                    labels=[det.label for det in target_detections],
-                    motion_score=motion.score,
+                    target_motion=bool(active_targets),
+                    labels=[target.detection.label for target in active_targets],
+                    motion_score=max((target.motion_score for target in active_targets), default=0.0),
                 )
                 decision = self.context.event_engine.process(observation)
                 pre_event_frames = self.context.pre_event_buffer.snapshot() + [packet]
 
                 if decision.action == "start_recording":
                     self.recorder.start(decision, pre_event_frames)
-                    self.recorder.write_frame(packet, target_detections)
+                    self.recorder.write_frame(packet, current_detections(active_targets))
                     self.logger.info("Started recording %s (%s)", decision.event_id, decision.label)
                 elif self.recorder.active:
-                    self.recorder.write_frame(packet, target_detections)
+                    self.recorder.write_frame(packet, current_detections(active_targets))
                     if decision.action == "finalize_recording":
                         record = self.recorder.finalize(decision)
                         self.logger.info("Finalized clip %s", record.clip_path)
@@ -102,7 +113,7 @@ class CatCamRuntime:
                 self.context.pre_event_buffer.append(packet)
 
                 if self.options.display:
-                    preview = draw_preview(frame, target_detections, motion.present)
+                    preview = draw_preview(frame, tracked_targets, motion.present)
                     cv2.imshow("catcam", preview)
                     if cv2.waitKey(1) & 0xFF == 27:
                         break
@@ -121,6 +132,7 @@ class CatCamRuntime:
                     decision.event_end = last_packet.wall_time
                 record = self.recorder.finalize(decision)
                 self.logger.info("Finalized clip at shutdown %s", record.clip_path)
+            self.recorder.close()
             self.camera.stop()
             if self.options.display:
                 cv2.destroyAllWindows()
@@ -147,20 +159,26 @@ def scale_motion_mask(motion, dst_shape: tuple[int, int, int]):
     return motion
 
 
-def draw_preview(frame, detections: list[Detection], motion_present: bool):
+def current_detections(targets: list[TrackedTarget]) -> list[Detection]:
+    return [target.detection for target in targets]
+
+
+def draw_preview(frame, targets: list[TrackedTarget], motion_present: bool):
     preview = frame.copy()
     color = (0, 255, 0) if motion_present else (100, 100, 100)
     cv2.putText(preview, f"motion={motion_present}", (10, 24), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
-    for detection in detections:
+    for target in targets:
+        detection = target.detection
         x0, y0, x1, y1 = [int(value) for value in detection.bbox]
-        cv2.rectangle(preview, (x0, y0), (x1, y1), (0, 255, 0), 2)
+        box_color = (0, 255, 0) if target.active_motion else (0, 180, 255)
+        cv2.rectangle(preview, (x0, y0), (x1, y1), box_color, 2)
         cv2.putText(
             preview,
-            f"{detection.label}:{detection.confidence:.2f}",
+            f"{detection.label}#{target.track_id} m={target.motion_score:.2f}",
             (x0, max(20, y0 - 10)),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.6,
-            (0, 255, 0),
+            box_color,
             2,
         )
     return preview

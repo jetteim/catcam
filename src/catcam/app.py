@@ -17,10 +17,14 @@ class AppContext:
     config: AppConfig
     pre_event_buffer: PreEventBuffer[FramePacket]
     event_engine: EventEngine
-    camera: CameraBackend
+    camera: CameraBackend | None
 
 
-def build_context(config_path: str | Path, input_path: str | None = None) -> AppContext:
+def build_context(
+    config_path: str | Path,
+    input_path: str | None = None,
+    include_camera: bool = True,
+) -> AppContext:
     config = load_config(config_path)
     buffer = PreEventBuffer[FramePacket](
         fps=config.camera.fps,
@@ -30,12 +34,12 @@ def build_context(config_path: str | Path, input_path: str | None = None) -> App
         recording=config.recording,
         confirm_frames=config.analysis.confirm_frames,
     )
-    camera = create_camera_backend(config, input_path=input_path)
+    camera = create_camera_backend(config, input_path=input_path) if include_camera else None
     return AppContext(config=config, pre_event_buffer=buffer, event_engine=engine, camera=camera)
 
 
-def bootstrap_storage(context: AppContext) -> Path:
-    return ensure_day_directory(context.config.recording.root, timestamp=_now())
+def bootstrap_storage(config: AppConfig) -> Path:
+    return ensure_day_directory(config.recording.root, timestamp=_now())
 
 
 def _now():

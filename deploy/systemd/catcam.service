@@ -1,0 +1,17 @@
+[Unit]
+Description=CatCam offline event capture
+After=local-fs.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/catcam
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/catcam/.venv/bin/python -m catcam.cli --config /opt/catcam/configs/rpi4-prod.json run
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

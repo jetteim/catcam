@@ -35,13 +35,17 @@ class NoopDetector(Detector):
 
 class MockCatDetector(Detector):
     def detect(self, frame) -> list[Detection]:
-        height, width = frame.shape[:2]
+        bright = np.argwhere(frame.max(axis=2) >= 200)
+        if bright.size == 0:
+            return []
+        y0, x0 = bright.min(axis=0)
+        y1, x1 = bright.max(axis=0)
         return [
             Detection(
                 label="cat",
                 original_label="cat",
                 confidence=0.99,
-                bbox=(width * 0.2, height * 0.2, width * 0.8, height * 0.8),
+                bbox=(float(x0), float(y0), float(x1 + 1), float(y1 + 1)),
             )
         ]
 

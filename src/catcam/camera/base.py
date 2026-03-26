@@ -17,3 +17,6 @@ class CameraBackend(ABC):
     @abstractmethod
     def stop(self) -> None:
         raise NotImplementedError
+
+    def native_camera(self):
+        return None
