@@ -15,14 +15,12 @@ dependencies = [
 
 [project.optional-dependencies]
 ml = [
-  "onnxruntime>=1.20",
-  "ultralytics>=8.3",
+  "onnxruntime>=1.19,<1.20",
 ]
 rpi = [
   "picamera2>=0.3",
 ]
 dev = [
-  "pytest>=8.3",
 ]
 
 [project.scripts]

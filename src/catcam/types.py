@@ -19,6 +19,7 @@ class Detection:
     label: str
     confidence: float
     bbox: tuple[float, float, float, float]
+    original_label: str | None = None
 
 
 @dataclass
@@ -55,3 +56,11 @@ class EventDecision:
     event_start: datetime | None = None
     event_end: datetime | None = None
     reason: str | None = None
+
+
+@dataclass
+class MotionAnalysis:
+    present: bool
+    score: float
+    area: int
+    mask: Any = None

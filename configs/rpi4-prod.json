@@ -12,6 +12,7 @@
     "height": 288,
     "fps": 8,
     "confirm_frames": 2,
+    "warmup_frames": 15,
     "motion_min_area": 700,
     "motion_min_score": 0.08
   },
@@ -23,10 +24,12 @@
     "container": "mp4"
   },
   "detection": {
-    "runtime": "onnxruntime",
-    "model_path": "models/detector.onnx",
+    "backend": "opencv_yolox",
+    "model_path": "models/opencv_yolox/object_detection_yolox_2022nov.onnx",
     "person_label": "person",
-    "cat_label": "cat"
+    "cat_label": "cat",
+    "confidence_threshold": 0.35,
+    "nms_threshold": 0.5
   },
   "baby_resolver": {
     "mode": "roi_person_is_baby",

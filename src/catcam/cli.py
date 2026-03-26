@@ -5,9 +5,12 @@ from dataclasses import asdict
 from datetime import datetime
 import json
 import logging
+from pathlib import Path
 
 from catcam.app import bootstrap_storage, build_context
 from catcam.logging_utils import configure_logging
+from catcam.pipeline.detector import smoke_test_detector
+from catcam.runtime import CatCamRuntime, RunOptions
 from catcam.storage.paths import build_clip_paths
 
 
@@ -23,6 +26,12 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("show-config", help="Print the resolved runtime config as JSON.")
     subparsers.add_parser("bootstrap-storage", help="Create today's recording directory.")
     subparsers.add_parser("sample-clip-path", help="Print a sample clip and metadata path.")
+    run_parser = subparsers.add_parser("run", help="Run the capture pipeline.")
+    run_parser.add_argument("--input", help="Optional path to a video file for replay testing.")
+    run_parser.add_argument("--max-frames", type=int, help="Stop after N frames.")
+    run_parser.add_argument("--display", action="store_true", help="Show a preview window.")
+    verify_model = subparsers.add_parser("verify-model", help="Verify that the detector model file exists.")
+    verify_model.add_argument("--model", help="Override model path for verification.")
     return parser
 
 
@@ -52,6 +61,31 @@ def main() -> int:
         )
         print(json.dumps({"clip_path": str(clip_path), "metadata_path": str(meta_path)}, indent=2))
         return 0
+
+    if args.command == "verify-model":
+        model_path = Path(args.model) if args.model else context.config.detection.model_path
+        config = context.config.detection
+        if args.model:
+            config.model_path = model_path
+        result = {
+            "model_path": str(model_path),
+            "exists": model_path.exists(),
+        }
+        if model_path.exists():
+            result.update(smoke_test_detector(config))
+        print(json.dumps(result, indent=2))
+        return 0
+
+    if args.command == "run":
+        runtime = CatCamRuntime(
+            RunOptions(
+                config_path=args.config,
+                input_path=args.input,
+                max_frames=args.max_frames,
+                display=args.display,
+            )
+        )
+        return runtime.run()
 
     parser.error(f"unknown command: {args.command}")
     return 2

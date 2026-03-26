@@ -20,6 +20,7 @@ class AnalysisConfig:
     height: int
     fps: int
     confirm_frames: int
+    warmup_frames: int
     motion_min_area: int
     motion_min_score: float
 
@@ -35,10 +36,12 @@ class RecordingConfig:
 
 @dataclass
 class DetectionConfig:
-    runtime: str
+    backend: str
     model_path: Path
     person_label: str
     cat_label: str
+    confidence_threshold: float
+    nms_threshold: float
 
 
 @dataclass
@@ -73,10 +76,12 @@ def load_config(path: str | Path) -> AppConfig:
             container=data["recording"]["container"],
         ),
         detection=DetectionConfig(
-            runtime=data["detection"]["runtime"],
+            backend=data["detection"]["backend"],
             model_path=Path(data["detection"]["model_path"]),
             person_label=data["detection"]["person_label"],
             cat_label=data["detection"]["cat_label"],
+            confidence_threshold=float(data["detection"]["confidence_threshold"]),
+            nms_threshold=float(data["detection"]["nms_threshold"]),
         ),
         baby_resolver=BabyResolverConfig(
             mode=data["baby_resolver"]["mode"],

@@ -24,18 +24,18 @@
 - [x] Implement `CameraBackend` interface.
 - [x] Implement macOS camera backend with OpenCV.
 - [x] Implement circular pre-event buffer.
-- [ ] Implement MP4 clip writer.
+- [x] Implement MP4 clip writer.
 - [x] Implement storage path builder for `records/YYYY/MM/DD`.
-- [ ] Save metadata JSON next to clips.
-- [ ] Add a synthetic replay mode from video file for repeatable tests.
+- [x] Save metadata JSON next to clips.
+- [x] Add a synthetic replay mode from video file for repeatable tests.
 
 ## Phase 3: Event Logic MVP
 
-- [ ] Implement motion gate with MOG2.
-- [ ] Add contour filtering and debounce.
-- [ ] Implement detector runtime wrapper.
+- [x] Implement motion gate with MOG2.
+- [x] Add contour filtering and debounce.
+- [x] Implement detector runtime wrapper.
 - [ ] Export a lightweight detector to ONNX.
-- [ ] Implement cat/person label mapping.
+- [x] Implement cat/person label mapping.
 - [ ] Implement simple IoU or centroid tracker.
 - [ ] Implement per-track motion scoring.
 - [x] Implement event state machine with pre-roll and post-roll.
@@ -83,7 +83,7 @@
 - [x] Unit test storage path creation.
 - [x] Unit test event merge and pre-roll rules.
 - [ ] Unit test motion scorer.
-- [ ] Integration test replaying known video clips.
+- [x] Integration test replaying known video clips.
 - [ ] Add golden tests for event timestamps.
 - [ ] Add platform smoke tests for macOS and Pi.
 

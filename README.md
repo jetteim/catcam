@@ -18,7 +18,25 @@ Planned delivery path:
 Current CLI examples:
 
 ```bash
-PYTHONPATH=src python3 -m catcam.cli --config configs/macos-dev.json show-config
-PYTHONPATH=src python3 -m catcam.cli --config configs/macos-dev.json bootstrap-storage
-PYTHONPATH=src python3 -m unittest discover -s tests -v
+.venv/bin/python -m catcam.cli --config configs/macos-dev.json verify-model
+.venv/bin/python -m catcam.cli --config configs/macos-dev.json run
+.venv/bin/python -m unittest discover -s tests -v
 ```
+
+Live macOS camera test:
+
+```bash
+.venv/bin/python -m catcam.cli --config configs/macos-dev.json run --display
+```
+
+Replay-file test:
+
+```bash
+.venv/bin/python -m catcam.cli --config configs/macos-dev.json run --input /path/to/video.mp4 --display
+```
+
+Current detection behavior:
+
+- `cat` uses the bundled OpenCV Zoo YOLOX COCO detector model at `models/opencv_yolox/object_detection_yolox_2022nov.onnx`.
+- `baby` uses the configured ROI rule on `person` detections for the MVP path.
+- clips are written under `records/YYYY/MM/DD` with adjacent JSON metadata.

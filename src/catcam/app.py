@@ -20,7 +20,7 @@ class AppContext:
     camera: CameraBackend
 
 
-def build_context(config_path: str | Path) -> AppContext:
+def build_context(config_path: str | Path, input_path: str | None = None) -> AppContext:
     config = load_config(config_path)
     buffer = PreEventBuffer[FramePacket](
         fps=config.camera.fps,
@@ -30,7 +30,7 @@ def build_context(config_path: str | Path) -> AppContext:
         recording=config.recording,
         confirm_frames=config.analysis.confirm_frames,
     )
-    camera = create_camera_backend(config)
+    camera = create_camera_backend(config, input_path=input_path)
     return AppContext(config=config, pre_event_buffer=buffer, event_engine=engine, camera=camera)
 
 
