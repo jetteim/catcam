@@ -2,8 +2,8 @@
 
 ## Phase 0: Decision Lock
 
-- [ ] Confirm Python as the implementation language.
-- [ ] Confirm Raspberry Pi OS 64-bit as the migration target.
+- [x] Confirm Python as the implementation language.
+- [x] Confirm Raspberry Pi OS 64-bit as the migration target.
 - [ ] Decide the initial camera scene type:
 - nursery/crib camera;
 - general room camera.
@@ -11,20 +11,21 @@
 
 ## Phase 1: Repository Bootstrap
 
-- [ ] Initialize a git repository.
-- [ ] Create Python project skeleton under `src/catcam`.
-- [ ] Add `pyproject.toml`.
-- [ ] Add config files for `macos-dev` and `rpi4-prod`.
-- [ ] Add model and records directories.
-- [ ] Add logging and basic CLI entrypoint.
+- [x] Initialize a git repository.
+- [x] Create Python project skeleton under `src/catcam`.
+- [x] Add `pyproject.toml`.
+- [x] Add config files for `macos-dev` and `rpi4-prod`.
+- [x] Add model and records directories.
+- [x] Add basic CLI entrypoint.
+- [x] Add logging.
 
 ## Phase 2: Camera + Recording Foundation
 
-- [ ] Implement `CameraBackend` interface.
-- [ ] Implement macOS camera backend with OpenCV.
-- [ ] Implement circular pre-event buffer.
+- [x] Implement `CameraBackend` interface.
+- [x] Implement macOS camera backend with OpenCV.
+- [x] Implement circular pre-event buffer.
 - [ ] Implement MP4 clip writer.
-- [ ] Implement storage path builder for `records/YYYY/MM/DD`.
+- [x] Implement storage path builder for `records/YYYY/MM/DD`.
 - [ ] Save metadata JSON next to clips.
 - [ ] Add a synthetic replay mode from video file for repeatable tests.
 
@@ -37,7 +38,7 @@
 - [ ] Implement cat/person label mapping.
 - [ ] Implement simple IoU or centroid tracker.
 - [ ] Implement per-track motion scoring.
-- [ ] Implement event state machine with pre-roll and post-roll.
+- [x] Implement event state machine with pre-roll and post-roll.
 - [ ] Verify that non-target motion does not save clips.
 
 ## Phase 4: Cat-Only Validation
@@ -61,7 +62,7 @@
 
 - [ ] Set up Raspberry Pi 4 with 64-bit Raspberry Pi OS.
 - [ ] Attach and validate Raspberry Pi camera with `Picamera2`.
-- [ ] Implement Pi camera backend.
+- [x] Implement Pi camera backend.
 - [ ] Implement Pi recording backend with `CircularOutput`.
 - [ ] Compare ONNX Runtime performance on Pi.
 - [ ] If needed, benchmark TFLite/INT8 or NCNN export.
@@ -79,8 +80,8 @@
 
 ## Phase 8: Test Coverage
 
-- [ ] Unit test storage path creation.
-- [ ] Unit test event merge and pre-roll rules.
+- [x] Unit test storage path creation.
+- [x] Unit test event merge and pre-roll rules.
 - [ ] Unit test motion scorer.
 - [ ] Integration test replaying known video clips.
 - [ ] Add golden tests for event timestamps.

@@ -1,0 +1,35 @@
+{
+  "profile": "rpi4-prod",
+  "camera": {
+    "backend": "picamera2",
+    "device": "rpi-camera",
+    "width": 1280,
+    "height": 720,
+    "fps": 15
+  },
+  "analysis": {
+    "width": 512,
+    "height": 288,
+    "fps": 8,
+    "confirm_frames": 2,
+    "motion_min_area": 700,
+    "motion_min_score": 0.08
+  },
+  "recording": {
+    "root": "records",
+    "pre_event_seconds": 2.0,
+    "post_event_seconds": 3.0,
+    "merge_gap_seconds": 6.0,
+    "container": "mp4"
+  },
+  "detection": {
+    "runtime": "onnxruntime",
+    "model_path": "models/detector.onnx",
+    "person_label": "person",
+    "cat_label": "cat"
+  },
+  "baby_resolver": {
+    "mode": "roi_person_is_baby",
+    "roi": [0.2, 0.2, 0.8, 0.95]
+  }
+}

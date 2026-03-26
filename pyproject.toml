@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "catcam"
+version = "0.1.0"
+description = "Offline cat or baby movement event capture for macOS and Raspberry Pi"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "numpy>=1.26",
+  "opencv-python>=4.10",
+]
+
+[project.optional-dependencies]
+ml = [
+  "onnxruntime>=1.20",
+  "ultralytics>=8.3",
+]
+rpi = [
+  "picamera2>=0.3",
+]
+dev = [
+  "pytest>=8.3",
+]
+
+[project.scripts]
+catcam = "catcam.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,35 @@
+{
+  "profile": "macos-dev",
+  "camera": {
+    "backend": "mac",
+    "device": "default",
+    "width": 1280,
+    "height": 720,
+    "fps": 15
+  },
+  "analysis": {
+    "width": 640,
+    "height": 360,
+    "fps": 10,
+    "confirm_frames": 2,
+    "motion_min_area": 750,
+    "motion_min_score": 0.08
+  },
+  "recording": {
+    "root": "records",
+    "pre_event_seconds": 2.0,
+    "post_event_seconds": 3.0,
+    "merge_gap_seconds": 6.0,
+    "container": "mp4"
+  },
+  "detection": {
+    "runtime": "onnxruntime",
+    "model_path": "models/detector.onnx",
+    "person_label": "person",
+    "cat_label": "cat"
+  },
+  "baby_resolver": {
+    "mode": "roi_person_is_baby",
+    "roi": [0.2, 0.2, 0.8, 0.95]
+  }
+}

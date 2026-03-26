@@ -15,3 +15,6 @@ records/
 models/
 artifacts/
 *.log
+
+!records/.gitkeep
+!models/.gitkeep

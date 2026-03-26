@@ -1,0 +1,2 @@
+"""CatCam package."""
+
