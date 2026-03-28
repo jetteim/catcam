@@ -36,6 +36,7 @@ Minimal smoke sequence on the Pi:
 .venv/bin/python -m catcam.cli --config configs/rpi4-prod.json verify-camera --frames 60
 .venv/bin/python -m catcam.cli --config configs/rpi4-prod.json verify-model
 .venv/bin/python -m catcam.cli --config configs/rpi4-prod.json bootstrap-storage
+.venv/bin/python -m catcam.cli --config configs/rpi4-prod.json benchmark --frames 180 --detector-mode motion-gated
 ```
 
 ## Brand-New Pi Setup
@@ -45,41 +46,27 @@ Use this on a fresh Raspberry Pi OS 64-bit install.
 1. Install system packages:
 
 ```bash
-sudo apt update
-sudo apt install --yes git python3-venv python3-pip python3-picamera2 python3-libcamera ffmpeg
+git clone https://github.com/jetteim/catcam.git
+cd catcam
+./scripts/pi_setup.sh
 ```
 
-2. Clone the repo and create the virtual environment:
+2. Verify the hardware, model, and baseline throughput:
 
 ```bash
-git clone git@github.com:jetteim/poc-macbook.git
-cd poc-macbook
-python3 -m venv .venv
-. .venv/bin/activate
-pip install --upgrade pip
-pip install -e ".[ml]"
+./scripts/pi_smoke_test.sh
 ```
 
-3. Verify the hardware and model:
-
-```bash
-.venv/bin/python -m catcam.cli --config configs/rpi4-prod.json verify-camera --frames 60
-.venv/bin/python -m catcam.cli --config configs/rpi4-prod.json verify-model
-```
-
-4. Start a manual run:
+3. Start a manual run:
 
 ```bash
 .venv/bin/python -m catcam.cli --config configs/rpi4-prod.json run
 ```
 
-5. Optional: install the `systemd` service:
+4. Optional: install the `systemd` service:
 
 ```bash
-sudo cp deploy/systemd/catcam.service /etc/systemd/system/catcam.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now catcam.service
-sudo systemctl status catcam.service
+./scripts/pi_install_service.sh
 ```
 
 ## Usage
@@ -108,6 +95,12 @@ Replay a saved input for deterministic testing:
 .venv/bin/python -m catcam.cli --config configs/macos-dev.json run --input /path/to/video.mp4 --display
 ```
 
+Benchmark detector throughput:
+
+```bash
+.venv/bin/python -m catcam.cli --config configs/rpi4-prod.json benchmark --frames 180 --detector-mode motion-gated
+```
+
 Run the test suite:
 
 ```bash
@@ -127,6 +120,7 @@ Run the test suite:
 - Install `python3-picamera2` from `apt`, not `pip`.
 - Keep the legacy camera stack disabled.
 - Use [deploy/systemd/catcam.service](deploy/systemd/catcam.service) as the starting unit file.
+- Use [pi_setup.sh](scripts/pi_setup.sh), [pi_smoke_test.sh](scripts/pi_smoke_test.sh), and [pi_install_service.sh](scripts/pi_install_service.sh) on a fresh Pi clone.
 - Pi-specific recording has unit coverage in this repo, but still needs on-device validation for your exact camera, OS image, and thermals.
 
 ## Contributor Guide

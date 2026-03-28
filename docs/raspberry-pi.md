@@ -19,12 +19,9 @@ sudo apt install --yes python3-picamera2 python3-libcamera ffmpeg
 ## Project Setup
 
 ```bash
-git clone <repo-url> /opt/catcam
+git clone https://github.com/jetteim/catcam.git /opt/catcam
 cd /opt/catcam
-python3 -m venv .venv
-. .venv/bin/activate
-pip install --upgrade pip
-pip install -e ".[ml]"
+./scripts/pi_setup.sh
 ```
 
 ## First Smoke Checks
@@ -32,18 +29,15 @@ pip install -e ".[ml]"
 Verify that the Pi camera backend starts and returns frames:
 
 ```bash
-.venv/bin/python -m catcam.cli --config configs/rpi4-prod.json verify-camera --frames 60
+./scripts/pi_smoke_test.sh
 ```
 
-Verify that the detector model is readable:
+The smoke script runs:
 
 ```bash
 .venv/bin/python -m catcam.cli --config configs/rpi4-prod.json verify-model
-```
-
-Bootstrap the dated storage tree:
-
-```bash
+.venv/bin/python -m catcam.cli --config configs/rpi4-prod.json verify-camera --frames 60
+.venv/bin/python -m catcam.cli --config configs/rpi4-prod.json benchmark --frames 180 --detector-mode motion-gated
 .venv/bin/python -m catcam.cli --config configs/rpi4-prod.json bootstrap-storage
 ```
 
@@ -58,10 +52,7 @@ Bootstrap the dated storage tree:
 Copy the unit template and adjust paths if your installation root is not `/opt/catcam`:
 
 ```bash
-sudo cp deploy/systemd/catcam.service /etc/systemd/system/catcam.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now catcam.service
-sudo systemctl status catcam.service
+./scripts/pi_install_service.sh
 ```
 
 Logs:

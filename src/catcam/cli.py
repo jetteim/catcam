@@ -8,6 +8,7 @@ import logging
 from pathlib import Path
 
 from catcam.app import bootstrap_storage, build_context
+from catcam.benchmark import BenchmarkOptions, benchmark_pipeline
 from catcam.config import load_config
 from catcam.logging_utils import configure_logging
 from catcam.pipeline.detector import smoke_test_detector
@@ -33,6 +34,15 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--display", action="store_true", help="Show a preview window.")
     verify_camera = subparsers.add_parser("verify-camera", help="Start the camera backend and sample frames.")
     verify_camera.add_argument("--frames", type=int, default=30, help="Number of frames to sample.")
+    benchmark = subparsers.add_parser("benchmark", help="Benchmark motion and detector throughput.")
+    benchmark.add_argument("--input", help="Optional replay file path for repeatable benchmarking.")
+    benchmark.add_argument("--frames", type=int, default=180, help="Number of frames to benchmark.")
+    benchmark.add_argument(
+        "--detector-mode",
+        choices=("motion-gated", "always"),
+        default="motion-gated",
+        help="Run detector only on motion frames or on every frame.",
+    )
     verify_model = subparsers.add_parser("verify-model", help="Verify that the detector model file exists.")
     verify_model.add_argument("--model", help="Override model path for verification.")
     return parser
@@ -68,6 +78,18 @@ def main() -> int:
     if args.command == "verify-camera":
         context = build_context(args.config, include_camera=True)
         result = inspect_camera(context, frames=args.frames)
+        print(json.dumps(result, indent=2))
+        return 0
+
+    if args.command == "benchmark":
+        result = benchmark_pipeline(
+            BenchmarkOptions(
+                config_path=args.config,
+                input_path=args.input,
+                frames=args.frames,
+                detector_mode=args.detector_mode,
+            )
+        )
         print(json.dumps(result, indent=2))
         return 0
 
