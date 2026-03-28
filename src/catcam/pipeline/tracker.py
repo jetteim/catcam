@@ -20,11 +20,19 @@ class SimpleTracker:
         min_iou: float,
         max_centroid_distance: float,
         min_motion_score: float,
+        cat_motion_min_score_scale: float = 0.5,
+        cat_motion_min_fraction: float = 0.015,
+        cat_bbox_motion_min_pixels: float = 4.0,
+        cat_bbox_area_change_min_ratio: float = 0.04,
     ) -> None:
         self.max_missing_frames = max_missing_frames
         self.min_iou = min_iou
         self.max_centroid_distance = max_centroid_distance
         self.min_motion_score = min_motion_score
+        self.cat_motion_min_score_scale = cat_motion_min_score_scale
+        self.cat_motion_min_fraction = cat_motion_min_fraction
+        self.cat_bbox_motion_min_pixels = cat_bbox_motion_min_pixels
+        self.cat_bbox_area_change_min_ratio = cat_bbox_area_change_min_ratio
         self._tracks: dict[int, _TrackState] = {}
         self._next_track_id = 1
 
@@ -50,6 +58,7 @@ class SimpleTracker:
                 bbox=candidate.detection.bbox,
             )
             self._tracks[track_id] = _TrackState(track_id=track_id, detection=detection)
+            motion_score = 0.6 * candidate.motion_fraction
             tracked_targets.append(
                 TrackedTarget(
                     track_id=track_id,
@@ -57,8 +66,14 @@ class SimpleTracker:
                     motion_fraction=candidate.motion_fraction,
                     centroid_distance=0.0,
                     area_change_ratio=0.0,
-                    motion_score=0.6 * candidate.motion_fraction,
-                    active_motion=(0.6 * candidate.motion_fraction) >= self.min_motion_score,
+                    motion_score=motion_score,
+                    active_motion=self._is_active_motion(
+                        candidate.resolved_label,
+                        motion_score,
+                        candidate.motion_fraction,
+                        centroid_distance=0.0,
+                        area_change_ratio=0.0,
+                    ),
                 )
             )
 
@@ -127,13 +142,41 @@ class SimpleTracker:
             centroid_distance=distance,
             area_change_ratio=area_change_ratio,
             motion_score=motion_score,
-            active_motion=motion_score >= self.min_motion_score,
+            active_motion=self._is_active_motion(
+                candidate.resolved_label,
+                motion_score,
+                candidate.motion_fraction,
+                centroid_distance=distance,
+                area_change_ratio=area_change_ratio,
+            ),
         )
 
     def _allocate_track_id(self) -> int:
         track_id = self._next_track_id
         self._next_track_id += 1
         return track_id
+
+    def _motion_threshold_for_label(self, label: str) -> float:
+        if label == "cat":
+            return self.min_motion_score * max(0.0, self.cat_motion_min_score_scale)
+        return self.min_motion_score
+
+    def _is_active_motion(
+        self,
+        label: str,
+        motion_score: float,
+        motion_fraction: float,
+        centroid_distance: float,
+        area_change_ratio: float,
+    ) -> bool:
+        if label == "cat":
+            if motion_fraction >= self.cat_motion_min_fraction:
+                return True
+            if centroid_distance >= self.cat_bbox_motion_min_pixels:
+                return True
+            if area_change_ratio >= self.cat_bbox_area_change_min_ratio:
+                return True
+        return motion_score >= self._motion_threshold_for_label(label)
 
 
 def bbox_iou(lhs: tuple[float, float, float, float], rhs: tuple[float, float, float, float]) -> float:

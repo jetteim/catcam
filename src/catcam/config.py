@@ -25,6 +25,10 @@ class AnalysisConfig:
     motion_min_score: float
     track_max_missing_frames: int = 5
     track_motion_min_score: float = 0.08
+    cat_motion_min_score_scale: float = 0.5
+    cat_motion_min_fraction: float = 0.015
+    cat_bbox_motion_min_pixels: float = 4.0
+    cat_bbox_area_change_min_ratio: float = 0.04
     track_min_iou: float = 0.3
     track_max_centroid_distance: float = 80.0
 
@@ -71,7 +75,15 @@ def load_config(path: str | Path) -> AppConfig:
     return AppConfig(
         profile=data["profile"],
         camera=CameraConfig(**data["camera"]),
-        analysis=AnalysisConfig(**data["analysis"]),
+        analysis=AnalysisConfig(
+            **{
+                **data["analysis"],
+                "cat_motion_min_score_scale": float(data["analysis"].get("cat_motion_min_score_scale", 0.5)),
+                "cat_motion_min_fraction": float(data["analysis"].get("cat_motion_min_fraction", 0.015)),
+                "cat_bbox_motion_min_pixels": float(data["analysis"].get("cat_bbox_motion_min_pixels", 4.0)),
+                "cat_bbox_area_change_min_ratio": float(data["analysis"].get("cat_bbox_area_change_min_ratio", 0.04)),
+            }
+        ),
         recording=RecordingConfig(
             root=Path(data["recording"]["root"]),
             pre_event_seconds=float(data["recording"]["pre_event_seconds"]),

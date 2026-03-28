@@ -91,6 +91,101 @@ class SimpleTrackerTests(unittest.TestCase):
         self.assertTrue(tracked[0].active_motion)
         self.assertGreaterEqual(tracked[0].motion_score, 0.08)
 
+    def test_cat_uses_lower_motion_threshold_after_detection(self) -> None:
+        tracker = SimpleTracker(
+            max_missing_frames=2,
+            min_iou=0.3,
+            max_centroid_distance=80.0,
+            min_motion_score=0.08,
+            cat_motion_min_score_scale=0.5,
+        )
+        tracker.update(
+            [
+                TargetCandidate(
+                    detection=Detection(label="cat", original_label="cat", confidence=0.9, bbox=(10, 10, 50, 50)),
+                    resolved_label="cat",
+                    motion_fraction=0.03,
+                )
+            ]
+        )
+        tracked = tracker.update(
+            [
+                TargetCandidate(
+                    detection=Detection(label="cat", original_label="cat", confidence=0.9, bbox=(16, 10, 56, 50)),
+                    resolved_label="cat",
+                    motion_fraction=0.03,
+                )
+            ]
+        )
+
+        self.assertTrue(tracked[0].active_motion)
+        self.assertLess(tracked[0].motion_score, 0.08)
+        self.assertGreaterEqual(tracked[0].motion_score, 0.04)
+
+    def test_cat_small_local_motion_counts_as_active(self) -> None:
+        tracker = SimpleTracker(
+            max_missing_frames=2,
+            min_iou=0.3,
+            max_centroid_distance=80.0,
+            min_motion_score=0.08,
+            cat_motion_min_score_scale=0.35,
+            cat_motion_min_fraction=0.015,
+        )
+        tracker.update(
+            [
+                TargetCandidate(
+                    detection=Detection(label="cat", original_label="cat", confidence=0.9, bbox=(10, 10, 50, 50)),
+                    resolved_label="cat",
+                    motion_fraction=0.01,
+                )
+            ]
+        )
+        tracked = tracker.update(
+            [
+                TargetCandidate(
+                    detection=Detection(label="cat", original_label="cat", confidence=0.9, bbox=(10, 10, 50, 50)),
+                    resolved_label="cat",
+                    motion_fraction=0.02,
+                )
+            ]
+        )
+
+        self.assertTrue(tracked[0].active_motion)
+        self.assertLess(tracked[0].motion_score, 0.028)
+
+    def test_cat_box_shift_counts_as_active_even_with_low_mask_motion(self) -> None:
+        tracker = SimpleTracker(
+            max_missing_frames=2,
+            min_iou=0.3,
+            max_centroid_distance=80.0,
+            min_motion_score=0.08,
+            cat_motion_min_score_scale=0.2,
+            cat_motion_min_fraction=0.01,
+            cat_bbox_motion_min_pixels=4.0,
+            cat_bbox_area_change_min_ratio=0.04,
+        )
+        tracker.update(
+            [
+                TargetCandidate(
+                    detection=Detection(label="cat", original_label="cat", confidence=0.9, bbox=(10, 10, 50, 50)),
+                    resolved_label="cat",
+                    motion_fraction=0.002,
+                )
+            ]
+        )
+        tracked = tracker.update(
+            [
+                TargetCandidate(
+                    detection=Detection(label="cat", original_label="cat", confidence=0.9, bbox=(15, 10, 55, 50)),
+                    resolved_label="cat",
+                    motion_fraction=0.002,
+                )
+            ]
+        )
+
+        self.assertTrue(tracked[0].active_motion)
+        self.assertLess(tracked[0].motion_score, 0.03)
+
 
 if __name__ == "__main__":
     unittest.main()

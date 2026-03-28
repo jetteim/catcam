@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime
+from math import floor
 from pathlib import Path
 
 from catcam.config import AppConfig
@@ -20,10 +21,13 @@ class RecordingSession:
     clip_path: Path
     metadata_path: Path
     writer: object
+    output_fps: float
+    clip_origin_time: datetime
     labels: Counter[str] = field(default_factory=Counter)
     confidences: dict[str, float] = field(default_factory=dict)
     last_written_time: datetime | None = None
     written_frames: set[int] = field(default_factory=set)
+    output_frame_count: int = 0
 
 
 class ClipRecorder(RecorderBackend):
@@ -56,7 +60,7 @@ class ClipRecorder(RecorderBackend):
 
         frame = pre_event_frames[0].image
         height, width = frame.shape[:2]
-        output_fps = estimate_output_fps(pre_event_frames, fallback_fps=float(self.config.camera.fps))
+        output_fps = float(self.config.camera.fps)
         writer = cv2.VideoWriter(
             str(clip_path),
             cv2.VideoWriter_fourcc(*"mp4v"),
@@ -73,6 +77,8 @@ class ClipRecorder(RecorderBackend):
             clip_path=clip_path,
             metadata_path=metadata_path,
             writer=writer,
+            output_fps=output_fps,
+            clip_origin_time=pre_event_frames[0].wall_time,
         )
         self._session = session
         for packet in pre_event_frames:
@@ -83,7 +89,16 @@ class ClipRecorder(RecorderBackend):
         session = self._require_session()
         if packet.frame_index in session.written_frames:
             return
-        session.writer.write(packet.image)
+        frames_to_write = target_frame_count_for_time(
+            clip_origin_time=session.clip_origin_time,
+            timestamp=packet.wall_time,
+            output_fps=session.output_fps,
+        ) - session.output_frame_count
+        if session.output_frame_count == 0:
+            frames_to_write = max(1, frames_to_write)
+        for _ in range(max(0, frames_to_write)):
+            session.writer.write(packet.image)
+            session.output_frame_count += 1
         session.written_frames.add(packet.frame_index)
         session.last_written_time = packet.wall_time
         if detections:
@@ -118,13 +133,6 @@ class ClipRecorder(RecorderBackend):
         return self._session
 
 
-def estimate_output_fps(pre_event_frames: list[FramePacket], fallback_fps: float) -> float:
-    if len(pre_event_frames) < 2:
-        return fallback_fps
-    elapsed = pre_event_frames[-1].monotonic_seconds - pre_event_frames[0].monotonic_seconds
-    if elapsed <= 0:
-        return fallback_fps
-    observed_fps = (len(pre_event_frames) - 1) / elapsed
-    if observed_fps < 1.0 or observed_fps > 120.0:
-        return fallback_fps
-    return observed_fps
+def target_frame_count_for_time(clip_origin_time: datetime, timestamp: datetime, output_fps: float) -> int:
+    elapsed_seconds = max(0.0, (timestamp - clip_origin_time).total_seconds())
+    return floor(elapsed_seconds * output_fps) + 1

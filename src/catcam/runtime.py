@@ -43,8 +43,13 @@ class CatCamRuntime:
             min_iou=self.context.config.analysis.track_min_iou,
             max_centroid_distance=self.context.config.analysis.track_max_centroid_distance,
             min_motion_score=self.context.config.analysis.track_motion_min_score,
+            cat_motion_min_score_scale=self.context.config.analysis.cat_motion_min_score_scale,
+            cat_motion_min_fraction=self.context.config.analysis.cat_motion_min_fraction,
+            cat_bbox_motion_min_pixels=self.context.config.analysis.cat_bbox_motion_min_pixels,
+            cat_bbox_area_change_min_ratio=self.context.config.analysis.cat_bbox_area_change_min_ratio,
         )
         self.recorder = create_recorder(self.context.config, self.camera)
+        self.idle_detection_interval_frames = max(1, self.context.config.camera.fps // 2)
 
     def run(self) -> int:
         processed = 0
@@ -72,7 +77,12 @@ class CatCamRuntime:
                     processed += 1
                     continue
                 detections: list[Detection] = []
-                if motion.present or self.recorder.active:
+                if should_run_detection(
+                    processed=processed,
+                    motion_present=motion.present,
+                    recorder_active=self.recorder.active,
+                    idle_interval_frames=self.idle_detection_interval_frames,
+                ):
                     detections = self.detector.detect(analysis_frame)
                 scaled_detections = [
                     scale_detection(
@@ -87,6 +97,7 @@ class CatCamRuntime:
                     scale_motion_mask(motion, frame.shape),
                     frame_shape=frame.shape,
                     baby_resolver=self.baby_resolver,
+                    min_confidence=self.context.config.detection.confidence_threshold,
                 )
                 tracked_targets = self.tracker.update(target_candidates)
                 active_targets = [target for target in tracked_targets if target.active_motion]
@@ -161,6 +172,15 @@ def scale_motion_mask(motion, dst_shape: tuple[int, int, int]):
 
 def current_detections(targets: list[TrackedTarget]) -> list[Detection]:
     return [target.detection for target in targets]
+
+
+def should_run_detection(
+    processed: int,
+    motion_present: bool,
+    recorder_active: bool,
+    idle_interval_frames: int,
+) -> bool:
+    return motion_present or recorder_active or processed % max(1, idle_interval_frames) == 0
 
 
 def draw_preview(frame, targets: list[TrackedTarget], motion_present: bool):

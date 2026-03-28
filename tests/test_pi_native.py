@@ -149,6 +149,7 @@ class PiNativeRecorderTests(unittest.TestCase):
                 motion_min_score=0.08,
                 track_max_missing_frames=5,
                 track_motion_min_score=0.08,
+                cat_motion_min_score_scale=0.5,
                 track_min_iou=0.3,
                 track_max_centroid_distance=80.0,
             ),

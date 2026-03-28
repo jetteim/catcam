@@ -13,8 +13,12 @@
     "fps": 10,
     "confirm_frames": 2,
     "warmup_frames": 15,
-    "motion_min_area": 750,
-    "motion_min_score": 0.08
+    "motion_min_area": 400,
+    "motion_min_score": 0.015,
+    "cat_motion_min_score_scale": 0.2,
+    "cat_motion_min_fraction": 0.01,
+    "cat_bbox_motion_min_pixels": 4.0,
+    "cat_bbox_area_change_min_ratio": 0.04
   },
   "recording": {
     "root": "records",
@@ -28,7 +32,7 @@
     "model_path": "models/opencv_yolox/object_detection_yolox_2022nov.onnx",
     "person_label": "person",
     "cat_label": "cat",
-    "confidence_threshold": 0.35,
+    "confidence_threshold": 0.25,
     "nms_threshold": 0.5
   },
   "baby_resolver": {

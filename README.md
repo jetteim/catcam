@@ -10,6 +10,12 @@ Offline event-triggered video capture for cat or baby movement, with macOS devel
 ./scripts/macos_quickstart.sh
 ```
 
+Debuggable live run:
+
+```bash
+DISPLAY_FLAG=1 MAX_FRAMES=900 ./scripts/macos_quickstart.sh
+```
+
 Smoke checks:
 
 ```bash
@@ -116,6 +122,7 @@ Run the test suite:
 - `macos-dev` currently runs cat-only by default with `baby_resolver.mode = disabled`.
 - `rpi4-prod` keeps ROI-based baby resolution enabled.
 - Both shipped profiles use `3` seconds of pre-roll and `3` seconds of inactivity hold-open.
+- Both shipped profiles use a more sensitive motion gate than before, plus cat-specific activation rules: a `0.2` cat track-motion threshold scale, a `0.01` cat motion-fraction floor, and an OR condition on cat box shift/size change so small cat movement such as grooming or posture changes can still count as active once a cat is detected.
 - macOS uses the frame-based recorder.
 - Raspberry Pi uses the Picamera2 native circular H.264 recorder path and remuxes to MP4 with `ffmpeg`.
 
