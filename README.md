@@ -7,10 +7,7 @@ Offline event-triggered video capture for cat or baby movement, with macOS devel
 ### macOS
 
 ```bash
-python3 -m venv .venv
-. .venv/bin/activate
-pip install --upgrade pip
-pip install -e ".[ml]"
+./scripts/macos_quickstart.sh
 ```
 
 Smoke checks:
@@ -23,7 +20,7 @@ Smoke checks:
 Live run:
 
 ```bash
-.venv/bin/python -m catcam.cli --config configs/macos-dev.json run
+./scripts/macos_quickstart.sh
 ```
 
 ### Raspberry Pi
@@ -46,24 +43,31 @@ Use this on a fresh Raspberry Pi OS 64-bit install.
 1. Install system packages:
 
 ```bash
+sudo apt update
+sudo apt install --yes git python3-venv python3-pip python3-picamera2 python3-libcamera ffmpeg
+```
+
+2. Clone the repo and install the project:
+
+```bash
 git clone https://github.com/jetteim/catcam.git
 cd catcam
 ./scripts/pi_setup.sh
 ```
 
-2. Verify the hardware, model, and baseline throughput:
+3. Verify the hardware, model, and baseline throughput:
 
 ```bash
 ./scripts/pi_smoke_test.sh
 ```
 
-3. Start a manual run:
+4. Start a manual run:
 
 ```bash
 .venv/bin/python -m catcam.cli --config configs/rpi4-prod.json run
 ```
 
-4. Optional: install the `systemd` service:
+5. Optional: install the `systemd` service:
 
 ```bash
 ./scripts/pi_install_service.sh
