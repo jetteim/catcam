@@ -9,7 +9,7 @@ pip install --upgrade pip
 pip install -e .
 ```
 
-On Raspberry Pi, install `python3-picamera2` from `apt` and keep the project installed in editable mode from the repo checkout.
+On Raspberry Pi, install `python3-picamera2` from `apt` and keep the project installed in editable mode from the repo checkout. The Pi venv needs `--system-site-packages` so it can import that system package.
 
 ## Before You Change Code
 

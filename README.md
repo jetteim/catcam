@@ -61,6 +61,8 @@ cd ~/catcam
 ./scripts/pi_setup.sh
 ```
 
+The Pi setup script creates `.venv` with `--system-site-packages` so the `apt`-installed `picamera2` module remains visible inside the virtualenv.
+
 3. Verify the hardware, model, and baseline throughput:
 
 ```bash
@@ -129,6 +131,7 @@ Run the test suite:
 ## Raspberry Pi Notes
 
 - Install `python3-picamera2` from `apt`, not `pip`.
+- The Pi virtualenv must include system site-packages so it can import the `apt`-installed `picamera2` module.
 - Run `./scripts/pi_setup.sh` as your normal user. The script uses `sudo` only for `apt`, and keeps the repo plus `.venv` owned by that user.
 - Keep the legacy camera stack disabled.
 - Use [deploy/systemd/catcam.service](deploy/systemd/catcam.service) as the home-directory example unit file.
