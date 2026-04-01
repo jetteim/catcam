@@ -19,10 +19,12 @@ sudo apt install --yes python3-picamera2 python3-libcamera ffmpeg
 ## Project Setup
 
 ```bash
-git clone https://github.com/jetteim/catcam.git /opt/catcam
-cd /opt/catcam
+git clone https://github.com/jetteim/catcam.git ~/catcam
+cd ~/catcam
 ./scripts/pi_setup.sh
 ```
+
+Run `./scripts/pi_setup.sh` as your normal user, not `root`. The script uses `sudo` only for `apt`, then creates `.venv` in your checkout so the repo stays writable without `sudo`.
 
 ## First Smoke Checks
 
@@ -49,10 +51,16 @@ The smoke script runs:
 
 ## systemd Service
 
-Copy the unit template and adjust paths if your installation root is not `/opt/catcam`:
+Install a unit rendered for the current checkout path and current user:
 
 ```bash
 ./scripts/pi_install_service.sh
+```
+
+Optional overrides:
+
+```bash
+SERVICE_USER=catcam CONFIG_PATH="$HOME/catcam/configs/rpi4-prod.json" ./scripts/pi_install_service.sh
 ```
 
 Logs:

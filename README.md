@@ -56,8 +56,8 @@ sudo apt install --yes git python3-venv python3-pip python3-picamera2 python3-li
 2. Clone the repo and install the project:
 
 ```bash
-git clone https://github.com/jetteim/catcam.git
-cd catcam
+git clone https://github.com/jetteim/catcam.git ~/catcam
+cd ~/catcam
 ./scripts/pi_setup.sh
 ```
 
@@ -129,8 +129,9 @@ Run the test suite:
 ## Raspberry Pi Notes
 
 - Install `python3-picamera2` from `apt`, not `pip`.
+- Run `./scripts/pi_setup.sh` as your normal user. The script uses `sudo` only for `apt`, and keeps the repo plus `.venv` owned by that user.
 - Keep the legacy camera stack disabled.
-- Use [deploy/systemd/catcam.service](deploy/systemd/catcam.service) as the starting unit file.
+- Use [deploy/systemd/catcam.service](deploy/systemd/catcam.service) as the home-directory example unit file.
 - Use [pi_setup.sh](scripts/pi_setup.sh), [pi_smoke_test.sh](scripts/pi_smoke_test.sh), and [pi_install_service.sh](scripts/pi_install_service.sh) on a fresh Pi clone.
 - Pi-specific recording has unit coverage in this repo, but still needs on-device validation for your exact camera, OS image, and thermals.
 
@@ -142,7 +143,7 @@ Development workflow:
 python3 -m venv .venv
 . .venv/bin/activate
 pip install --upgrade pip
-pip install -e ".[ml]"
+pip install -e .
 .venv/bin/python -m unittest discover -s tests -v
 ```
 

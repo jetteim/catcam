@@ -5,9 +5,9 @@ After=local-fs.target
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/opt/catcam
+WorkingDirectory=%h/catcam
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/opt/catcam/.venv/bin/python -m catcam.cli --config /opt/catcam/configs/rpi4-prod.json run
+ExecStart=%h/catcam/.venv/bin/python -m catcam.cli --config %h/catcam/configs/rpi4-prod.json run
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal

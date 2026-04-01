@@ -17,7 +17,7 @@ Why Python over Go:
 
 - `opencv-python`: frame processing, motion masks, resizing, morphology, optional webcam capture on macOS.
 - `numpy`: frame math and buffering.
-- `onnxruntime`: primary offline inference runtime for both macOS and Raspberry Pi OS 64-bit.
+- OpenCV DNN with an ONNX model file: primary offline inference runtime for both macOS and Raspberry Pi OS 64-bit.
 - `ultralytics`: model export and training-time tooling only, not required in production runtime.
 - `PyYAML` or `pydantic-settings`: config loading.
 - `PyAV` or `ffmpeg` subprocess: macOS clip muxing/writing.

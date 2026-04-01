@@ -14,9 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-ml = [
-  "onnxruntime>=1.19,<1.20",
-]
+ml = []
 rpi = [
   "picamera2>=0.3",
 ]

@@ -6,7 +6,7 @@
 python3 -m venv .venv
 . .venv/bin/activate
 pip install --upgrade pip
-pip install -e ".[ml]"
+pip install -e .
 ```
 
 On Raspberry Pi, install `python3-picamera2` from `apt` and keep the project installed in editable mode from the repo checkout.

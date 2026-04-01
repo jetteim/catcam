@@ -10,6 +10,7 @@ from pathlib import Path
 from catcam.app import bootstrap_storage, build_context
 from catcam.benchmark import BenchmarkOptions, benchmark_pipeline
 from catcam.config import load_config
+from catcam.deploy import render_systemd_unit
 from catcam.logging_utils import configure_logging
 from catcam.pipeline.detector import smoke_test_detector
 from catcam.runtime import CatCamRuntime, RunOptions
@@ -45,6 +46,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     verify_model = subparsers.add_parser("verify-model", help="Verify that the detector model file exists.")
     verify_model.add_argument("--model", help="Override model path for verification.")
+    print_systemd_unit = subparsers.add_parser(
+        "print-systemd-unit",
+        help="Render a systemd unit for the current checkout.",
+    )
+    print_systemd_unit.add_argument(
+        "--project-root",
+        default=".",
+        help="Path to the CatCam checkout used for WorkingDirectory and ExecStart.",
+    )
+    print_systemd_unit.add_argument(
+        "--service-user",
+        required=True,
+        help="Linux user that will own the service process.",
+    )
+    print_systemd_unit.add_argument(
+        "--config",
+        help="Absolute or relative config path to use in ExecStart.",
+    )
     return parser
 
 
@@ -52,19 +71,20 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
     configure_logging()
-    config = load_config(args.config)
     logger = logging.getLogger("catcam.cli")
-    logger.info("Loaded profile %s", config.profile)
 
     if args.command == "show-config":
+        config = load_runtime_config(args.config, logger)
         print(json.dumps(asdict(config), indent=2, default=str))
         return 0
 
     if args.command == "bootstrap-storage":
+        config = load_runtime_config(args.config, logger)
         print(bootstrap_storage(config))
         return 0
 
     if args.command == "sample-clip-path":
+        config = load_runtime_config(args.config, logger)
         clip_path, meta_path = build_clip_paths(
             root=config.recording.root,
             timestamp=datetime.now(),
@@ -94,6 +114,7 @@ def main() -> int:
         return 0
 
     if args.command == "verify-model":
+        config = load_runtime_config(args.config, logger)
         model_path = Path(args.model) if args.model else config.detection.model_path
         detection_config = config.detection
         if args.model:
@@ -105,6 +126,17 @@ def main() -> int:
         if model_path.exists():
             result.update(smoke_test_detector(detection_config))
         print(json.dumps(result, indent=2))
+        return 0
+
+    if args.command == "print-systemd-unit":
+        print(
+            render_systemd_unit(
+                project_root=args.project_root,
+                service_user=args.service_user,
+                config_path=args.config,
+            ),
+            end="",
+        )
         return 0
 
     if args.command == "run":
@@ -120,6 +152,12 @@ def main() -> int:
 
     parser.error(f"unknown command: {args.command}")
     return 2
+
+
+def load_runtime_config(config_path: str, logger: logging.Logger):
+    config = load_config(config_path)
+    logger.info("Loaded profile %s", config.profile)
+    return config
 
 
 def inspect_camera(context, frames: int) -> dict[str, object]:
