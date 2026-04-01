@@ -62,6 +62,7 @@ cd ~/catcam
 ```
 
 The Pi setup script creates `.venv` with `--system-site-packages` so the `apt`-installed `picamera2` module remains visible inside the virtualenv.
+It also downloads the YOLOX ONNX model into the ignored `models/` directory so `verify-model` and the smoke benchmark can run on a fresh clone.
 
 3. Verify the hardware, model, and baseline throughput:
 

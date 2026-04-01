@@ -10,11 +10,12 @@ if [[ "$(id -u)" -eq 0 ]]; then
 fi
 
 sudo apt update
-sudo apt install --yes git python3-venv python3-pip python3-picamera2 python3-libcamera ffmpeg
+sudo apt install --yes curl git python3-venv python3-pip python3-picamera2 python3-libcamera ffmpeg
 
 python3 -m venv --clear --system-site-packages .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e .
+"$ROOT/scripts/fetch_model_assets.sh"
 
 echo "Pi setup complete in $ROOT"

@@ -26,6 +26,7 @@ cd ~/catcam
 
 Run `./scripts/pi_setup.sh` as your normal user, not `root`. The script uses `sudo` only for `apt`, then creates `.venv` in your checkout so the repo stays writable without `sudo`.
 It also enables `--system-site-packages`, which is required because `python3-picamera2` is provided by `apt` rather than `pip`.
+The setup script also downloads the YOLOX model assets into `models/opencv_yolox/`, because that directory is intentionally excluded from git.
 
 ## First Smoke Checks
 

@@ -126,7 +126,7 @@ def main() -> int:
         if model_path.exists():
             result.update(smoke_test_detector(detection_config))
         print(json.dumps(result, indent=2))
-        return 0
+        return 0 if model_path.exists() else 1
 
     if args.command == "print-systemd-unit":
         print(
