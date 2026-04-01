@@ -18,7 +18,7 @@ class ScriptTests(unittest.TestCase):
         script_text = script_path.read_text(encoding="utf-8")
         fetch_script_text = fetch_script_path.read_text(encoding="utf-8")
 
-        self.assertIn('"$ROOT/scripts/fetch_model_assets.sh"', script_text)
+        self.assertIn('bash "$ROOT/scripts/fetch_model_assets.sh"', script_text)
         self.assertIn("object_detection_yolox_2022nov.onnx", fetch_script_text)
         self.assertIn("https://huggingface.co/opencv/object_detection_yolox/resolve/main/object_detection_yolox_2022nov.onnx", fetch_script_text)
 

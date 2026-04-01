@@ -16,6 +16,6 @@ python3 -m venv --clear --system-site-packages .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e .
-"$ROOT/scripts/fetch_model_assets.sh"
+bash "$ROOT/scripts/fetch_model_assets.sh"
 
 echo "Pi setup complete in $ROOT"
